@@ -1,0 +1,40 @@
+{
+  "before": {
+    "version": "3.2.1",
+    "source": "https://client.rum.us-east-1.amazonaws.com/3.2.1/cwr.js",
+    "file": "sdk/3.2.1/sdk.js",
+    "unchangedReleasedBytes": true
+  },
+  "after": {
+    "version": "3.2.1 with proposed fix (not an official release)",
+    "sourceCommit": "64ba4bfaca65f396a44b6bc88410b0c65fa60c64",
+    "sourceTree": "df61bfe88e63462b49d82e30ef738c4a3c05050b",
+    "baseCommit": "739edab8b2be747717b9ccb176564f1d041b057b",
+    "source": "https://github.com/tamazonian/aws-rum-web/commit/64ba4bfaca65f396a44b6bc88410b0c65fa60c64",
+    "file": "sdk/fix-64ba4bf/sdk.js",
+    "buildCommand": "npm run build",
+    "nodeVersion": "24.13.0",
+    "webpackVersion": "5.106.1",
+    "bundleChangesAfterBuild": "Added test-build notice only; SDK code unchanged from native build.",
+    "nativeBundleSHA256": "b305f2bca2e730af55ed1d73d90852b78c6590951edf20a3b68031d5e6706dc2",
+    "packageLockSHA256": "09c2e9c36b1e8709aa5152cc00e5626f3c483857c9f4fb6141b2f7912eeb88aa"
+  },
+  "comparison": "Both pages use the same demo.js and failure. The native fixed bundle differs from the released bundle only in the credential-prefetch rejection handler; the hosted fixed copy also adds a test-build notice.",
+  "filesSHA256": {
+    ".nojekyll": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "after.html": "a63fea49ac987745f8457cf81d6d9f9bf7c292183765f33b5286542f0315c5b2",
+    "before.html": "cdee33709d02decebf3889317b4d024fba7454d27fc345438fa19593032d9218",
+    "demo.js": "608bb718b3d9fa077df81aff1c72634f47ee50fb439bfa4bb7b15d16a23f5481",
+    "index.html": "cdee33709d02decebf3889317b4d024fba7454d27fc345438fa19593032d9218",
+    "sdk/3.2.1/LICENSE": "09e8a9bcec8067104652c168685ab0931e7868f9c8284b66f5ae6edae5f1130b",
+    "sdk/3.2.1/LICENSE-THIRD-PARTY": "01ed662ee0cc20d7592d433e0732b8c11d711348c31f31bd1f4c015547564daa",
+    "sdk/3.2.1/NOTICE": "d4290ed64c2edd0fce1d84e3f9dfb2881240fe534def76b8cd29ed6af683e287",
+    "sdk/3.2.1/sdk.js": "ab72692c248361dfb37d66291858e1ec6b518809b5536ef1079d3a9d320832ff",
+    "sdk/fix-64ba4bf/BUNDLED-LICENSES.txt": "0d8f66cd4afb566cb5b7e1540c68f43b939d3eba12ace290f18abc4f4cb53ed0",
+    "sdk/fix-64ba4bf/LICENSE": "09e8a9bcec8067104652c168685ab0931e7868f9c8284b66f5ae6edae5f1130b",
+    "sdk/fix-64ba4bf/LICENSE-THIRD-PARTY": "01ed662ee0cc20d7592d433e0732b8c11d711348c31f31bd1f4c015547564daa",
+    "sdk/fix-64ba4bf/NOTICE": "d4290ed64c2edd0fce1d84e3f9dfb2881240fe534def76b8cd29ed6af683e287",
+    "sdk/fix-64ba4bf/sdk.js": "3bc2deb1bb54de2fb2cf8cf7e4e04f0dd36dda0c5242b13f87a84a8b25d579b8",
+    "style.css": "b3eaefa311dc60113888dc834630b03a69809eb47eb0e6ea22aa0df3b2bb4031"
+  }
+}

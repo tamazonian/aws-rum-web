@@ -4,18 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'">
-<title>Before the fix | RUM error demo</title>
+<title>After the fix | RUM error demo</title>
 <link rel="stylesheet" href="./style.css">
 </head>
-<body data-version="before" data-sdk="./sdk/3.2.1/sdk.js">
+<body data-version="after" data-sdk="./sdk/fix-64ba4bf/sdk.js">
 <nav aria-label="Compare versions">
-<a href="./before.html" aria-current="page">Before the fix</a>
-<a href="./after.html">After the fix</a>
+<a href="./before.html">Before the fix</a>
+<a href="./after.html" aria-current="page">After the fix</a>
 </nav>
 <main>
-<h1>Before the fix</h1>
+<h1>After the fix</h1>
 <p>RUM is a website monitoring tool. This test makes its request for AWS access fail on purpose.</p>
-<p>RUM leaves the failure unhandled. The browser reports it as an error, which other monitoring tools can mistake for a problem in your website.</p>
+<p>RUM handles the failure and prints a warning instead. The fix does not grant AWS access; it stops this failure from becoming an unhandled browser error.</p>
 <section aria-label="Test result">
 <p id="status" role="status">Loading the test...</p>
 <noscript>This test needs JavaScript. No result is available.</noscript>
@@ -25,11 +25,11 @@
 <div><dt>Warnings from RUM</dt><dd id="warnings">0</dd></div>
 </dl>
 </section>
-<p><a href="./before.html">Run this test again</a></p>
+<p><a href="./after.html">Run this test again</a></p>
 <p class="note">No sign-in needed. Both pages run the same test. No data is sent to AWS, and no cookies are used.</p>
 <details>
 <summary>Technical details</summary>
-<p>This page uses the original aws-rum-web 3.2.1 release. <a href="https://client.rum.us-east-1.amazonaws.com/3.2.1/cwr.js">View source</a>.</p>
+<p>This page uses 3.2.1 with the proposed fix. This is a test build, not an official release. <a href="https://github.com/tamazonian/aws-rum-web/commit/64ba4bfaca65f396a44b6bc88410b0c65fa60c64">View source</a>.</p>
 <p>A credential provider returns a rejected promise. The page counts its calls, matching browser <code>unhandledrejection</code> events, and the fix's warning. It does not catch the provider's error or hide browser errors.</p>
 <pre><code>cwr('setAwsCredentials', () =&gt;
     Promise.reject(new Error('Example credential failure'))
@@ -39,7 +39,7 @@
 <p><a href="./build-info.json">Build details and file checksums</a></p>
 </details>
 </main>
-<footer><a href="./sdk/3.2.1/LICENSE">License</a> · <a href="./sdk/3.2.1/LICENSE-THIRD-PARTY">Third-party licenses</a> · <a href="./sdk/3.2.1/NOTICE">Notice</a></footer>
+<footer><a href="./sdk/fix-64ba4bf/LICENSE">License</a> · <a href="./sdk/fix-64ba4bf/LICENSE-THIRD-PARTY">Third-party licenses</a> · <a href="./sdk/fix-64ba4bf/NOTICE">Notice</a></footer>
 <script src="./demo.js"></script>
 </body>
 </html>
