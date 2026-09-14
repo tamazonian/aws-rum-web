@@ -2,7 +2,7 @@
 <html lang="en">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' https://client.rum.us-east-1.amazonaws.com; style-src 'unsafe-inline'; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'none'; base-uri 'none'; form-action 'none'">
 <title>RUM credential rejection reproduction</title>
 <style>
 body { font: 17px/1.6 system-ui, sans-serif; max-width: 720px; margin: 48px auto; padding: 0 24px; color: #17202a; }
@@ -14,13 +14,14 @@ pre { white-space: pre-wrap; padding: 16px; background: #f3f5f7; }
 <p id="status" role="status">Loading the released SDK...</p>
 <pre id="details">Credential provider calls: 0
 Matching unhandled rejections: 0</pre>
-<p>No AWS account or credentials are needed. Monitoring and cookies are disabled, and this page blocks outgoing data connections. It only downloads the public SDK script.</p>
+<p>No AWS account or credentials are needed. Monitoring and cookies are disabled, and this page blocks outgoing data connections. It only downloads an unchanged copy of the public SDK script from this site.</p>
 <p>This reproduces the released version's bug. It does not run or prove the proposed fix.</p>
 <h2>What runs</h2>
 <pre>cwr('setAwsCredentials', () =&gt;
     Promise.reject(new Error('Example credential failure'))
 );</pre>
-<p>Refresh to run again. If the SDK cannot load, check whether an ad blocker blocked its URL.</p>
+<p>Refresh to run again. If the SDK cannot load, the test has not run.</p>
+<p>The SDK is an unchanged copy of the <a href="https://client.rum.us-east-1.amazonaws.com/3.2.1/cwr.js">public 3.2.1 release</a>, hosted here so the demo does not need to load a script from a monitoring domain. <a href="./sdk/3.2.1/LICENSE">License</a>, <a href="./sdk/3.2.1/LICENSE-THIRD-PARTY">third-party licenses</a>, and <a href="./sdk/3.2.1/NOTICE">notice</a>.</p>
 <script>
 const failure = new Error('Example credential failure');
 let calls = 0;
@@ -47,12 +48,15 @@ window.AwsRumClient = {
     } }]
 };
 const sdk = document.createElement('script');
-sdk.src = 'https://client.rum.us-east-1.amazonaws.com/3.2.1/cwr.js';
+sdk.src = './sdk/3.2.1/sdk.js';
 sdk.onerror = () => { status.textContent = 'Could not load the SDK. The test did not run.'; };
+sdk.onload = () => {
+    if (!calls) status.textContent = 'SDK loaded. Waiting for the credential provider...';
+    setTimeout(() => {
+        if (!calls) status.textContent = 'The SDK loaded but the provider did not run. Result is inconclusive.';
+        else if (!rejections) status.textContent = 'No matching unhandled rejection observed. Check the browser console before drawing a conclusion.';
+    }, 3000);
+};
 document.head.appendChild(sdk);
-setTimeout(() => {
-    if (!calls) status.textContent = 'The provider did not run. Result is inconclusive.';
-    else if (!rejections) status.textContent = 'No matching unhandled rejection observed. Check the browser console before drawing a conclusion.';
-}, 3000);
 </script>
 </html>
