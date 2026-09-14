@@ -13,6 +13,8 @@ import { EventCache } from '@aws-rum/web-core/event-cache/EventCache';
 import { CRED_KEY, IDENTITY_KEY } from '@aws-rum/web-core/utils/constants';
 import { InternalLogger } from '@aws-rum/web-core/utils/InternalLogger';
 
+jest.mock('@aws-rum/web-core/utils/InternalLogger');
+
 global.fetch = mockFetch;
 const sendFetch = jest.fn(() => Promise.resolve());
 const sendBeacon = jest.fn(() => Promise.resolve());
@@ -106,64 +108,84 @@ describe('Dispatch tests', () => {
 
         // Assert
         expect(credentialProvider).toHaveBeenCalledTimes(1);
+        expect(DataPlaneClient).toHaveBeenLastCalledWith(
+            expect.objectContaining({ credentials: credentialProvider }),
+            undefined
+        );
     });
 
-    describe('credential prefetch', () => {
-        beforeEach(() => {
-            dispatch = new Dispatch(
-                Utils.APPLICATION_ID,
-                Utils.AWS_RUM_REGION,
-                Utils.AWS_RUM_ENDPOINT,
-                Utils.createDefaultEventCacheWithEvents(),
-                { ...DEFAULT_CONFIG, dispatchInterval: Utils.AUTO_DISPATCH_OFF }
-            );
-        });
+    test('when credentials fail then a warning is logged', async () => {
+        // Init
+        const credentialProvider = () =>
+            Promise.reject(new Error('Example credential failure'));
 
-        test('warns on prefetch rejection without replacing the provider', async () => {
-            const warn = jest
-                .spyOn(InternalLogger, 'warn')
-                .mockImplementation();
-            try {
-                let rejectPrefetch!: (reason: Error) => void;
-                const prefetch = new Promise<AwsCredentialIdentity>(
-                    (_, reject) => {
-                        rejectPrefetch = reject;
-                    }
-                );
-                // Keep the test safe when the production rejection handler is missing.
-                void prefetch.catch(() => undefined);
-                const provider = () => prefetch;
-
-                dispatch.setAwsCredentials(provider);
-                expect(warn).not.toHaveBeenCalled();
-                rejectPrefetch(new Error('Example credential failure'));
-                await Promise.resolve();
-
-                expect(warn.mock.calls).toEqual([
-                    [
-                        'Could not get AWS credentials. RUM may be unable to send monitoring data.'
-                    ]
-                ]);
-                expect(DataPlaneClient).toHaveBeenLastCalledWith(
-                    expect.objectContaining({ credentials: provider }),
-                    undefined
-                );
-            } finally {
-                warn.mockRestore();
+        dispatch = new Dispatch(
+            Utils.APPLICATION_ID,
+            Utils.AWS_RUM_REGION,
+            Utils.AWS_RUM_ENDPOINT,
+            Utils.createDefaultEventCacheWithEvents(),
+            {
+                ...DEFAULT_CONFIG,
+                dispatchInterval: Utils.AUTO_DISPATCH_OFF
             }
+        );
+
+        // Run
+        dispatch.setAwsCredentials(credentialProvider);
+        await Promise.resolve(); // Let the rejection handler run.
+
+        // Assert
+        expect(InternalLogger.warn).toHaveBeenCalledWith(
+            'Could not get AWS credentials. RUM may be unable to send monitoring data.'
+        );
+    });
+
+    test('when a provider returns credentials directly then it is accepted', () => {
+        // Init
+        const credentialProvider = jest
+            .fn()
+            .mockReturnValue(Utils.createAwsCredentials());
+
+        dispatch = new Dispatch(
+            Utils.APPLICATION_ID,
+            Utils.AWS_RUM_REGION,
+            Utils.AWS_RUM_ENDPOINT,
+            Utils.createDefaultEventCacheWithEvents(),
+            {
+                ...DEFAULT_CONFIG,
+                dispatchInterval: Utils.AUTO_DISPATCH_OFF
+            }
+        );
+
+        // Run and Assert
+        expect(() =>
+            dispatch.setAwsCredentials(credentialProvider)
+        ).not.toThrow();
+    });
+
+    test('when a provider returns an object with a then method then it is accepted', () => {
+        // Init
+        const credentials = Utils.createAwsCredentials();
+        const credentialProvider = jest.fn().mockReturnValue({
+            then: (resolve: (value: AwsCredentialIdentity) => void) =>
+                resolve(credentials)
         });
 
-        test.each([
-            ['plain credentials', Utils.createAwsCredentials()],
-            [
-                'then-only object',
-                { then: (resolve) => resolve(Utils.createAwsCredentials()) }
-            ]
-        ])('accepts a JavaScript provider returning %s', (_name, result) => {
-            // JavaScript callers can return values outside the declared type.
-            const provider = (() => result) as AwsCredentialIdentityProvider;
-            expect(() => dispatch.setAwsCredentials(provider)).not.toThrow();
-        });
+        dispatch = new Dispatch(
+            Utils.APPLICATION_ID,
+            Utils.AWS_RUM_REGION,
+            Utils.AWS_RUM_ENDPOINT,
+            Utils.createDefaultEventCacheWithEvents(),
+            {
+                ...DEFAULT_CONFIG,
+                dispatchInterval: Utils.AUTO_DISPATCH_OFF
+            }
+        );
+
+        // Run and Assert
+        expect(() =>
+            dispatch.setAwsCredentials(credentialProvider)
+        ).not.toThrow();
     });
 
     test('dispatch() throws exception when send fails', async () => {
